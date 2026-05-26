@@ -115,6 +115,10 @@ font-size:48px;
 font-weight:bold;
 pointer-events:none;
 opacity:0;
+color:#00ffff;
+text-shadow:
+0 0 10px #00ffff,
+0 0 20px #00ffff;
 }
 
 .show{
@@ -215,7 +219,8 @@ HOLD
 <button onclick="move(-1)">←</button>
 <button onclick="drop()">↓</button>
 <button onclick="move(1)">→</button>
-<button onclick="rotatePlayer()">↻</button>
+<button onclick="rotatePlayer(-1)">↺</button>
+<button onclick="rotatePlayer(1)">↻</button>
 <button onclick="hardDrop()">⤓</button>
 <button onclick="holdPieceFunc()">H</button>
 
@@ -262,15 +267,15 @@ level:1,
 combo:0
 };
 
-let next=randomPiece();
+let bag=[];
+let next=getNextPiece();
+
 let hold=null;
 let canHold=true;
 
 let dropCounter=0;
 let lastTime=0;
 let speed=700;
-
-/* 着地猶予 */
 
 let lockDelay=0;
 let lockDelayMax=30;
@@ -285,6 +290,36 @@ matrix.push(new Array(w).fill(0));
 }
 
 return matrix;
+
+}
+
+/* ===== TETRIS99風7バッグ ===== */
+
+function generateBag(){
+
+const pieces=['T','J','L','O','S','Z','I'];
+
+for(let i=pieces.length-1;i>0;i--){
+
+const j=Math.floor(Math.random()*(i+1));
+
+[pieces[i],pieces[j]]=[pieces[j],pieces[i]];
+
+}
+
+return pieces;
+
+}
+
+function getNextPiece(){
+
+if(bag.length===0){
+
+bag=generateBag();
+
+}
+
+return createPiece(bag.pop());
 
 }
 
@@ -342,16 +377,6 @@ return [
 [0,0,0]
 ];
 }
-
-}
-
-function randomPiece(){
-
-const pieces='TJLOSZI';
-
-return createPiece(
-pieces[Math.floor(Math.random()*pieces.length)]
-);
 
 }
 
@@ -468,7 +493,7 @@ function resetPlayer(){
 
 player.matrix=next;
 
-next=randomPiece();
+next=getNextPiece();
 
 player.pos.y=0;
 player.pos.x=3;
@@ -524,8 +549,6 @@ BLOCK,
 BLOCK
 );
 
-/* 上ハイライト */
-
 ctx.fillStyle="#ffffff55";
 
 ctx.fillRect(
@@ -535,16 +558,12 @@ BLOCK-4,
 4
 );
 
-/* 左ハイライト */
-
 ctx.fillRect(
 gx+2,
 gy+2,
 4,
 BLOCK-4
 );
-
-/* 下影 */
 
 ctx.fillStyle="#00000066";
 
@@ -555,16 +574,12 @@ BLOCK,
 5
 );
 
-/* 右影 */
-
 ctx.fillRect(
 gx+BLOCK-5,
 gy,
 5,
 BLOCK
 );
-
-/* 枠 */
 
 ctx.strokeStyle="#ffffff";
 ctx.lineWidth=2;
@@ -660,8 +675,6 @@ function draw(){
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
-/* グリッド */
-
 ctx.strokeStyle="#ffffff11";
 ctx.lineWidth=1;
 
@@ -689,8 +702,6 @@ ctx.stroke();
 
 }
 
-/* 盤面 */
-
 arena.forEach((row,y)=>{
 
 row.forEach((value,x)=>{
@@ -709,8 +720,6 @@ COLORS[value]
 
 });
 
-/* パーティクル */
-
 for(const p of particles){
 
 ctx.fillStyle='#00ffff';
@@ -726,11 +735,7 @@ p.y,
 
 updateParticles();
 
-/* ゴースト */
-
 drawGhost();
-
-/* プレイヤー */
 
 player.matrix.forEach((row,y)=>{
 
@@ -808,7 +813,7 @@ resetPlayer();
 
 }
 
-function rotate(matrix){
+function rotate(matrix,dir){
 
 for(let y=0;y<matrix.length;y++){
 
@@ -826,23 +831,27 @@ matrix[x][y]
 
 }
 
+if(dir>0){
+
 matrix.forEach(row=>row.reverse());
-
-}
-
-function rotatePlayer(){
-
-rotate(player.matrix);
-
-if(collide()){
-
-rotate(player.matrix);
-rotate(player.matrix);
-rotate(player.matrix);
 
 }else{
 
-showEffect('T-SPIN');
+matrix.reverse();
+
+}
+
+}
+
+function rotatePlayer(dir){
+
+rotate(player.matrix,dir);
+
+if(collide()){
+
+rotate(player.matrix,-dir);
+
+}else{
 
 if(touchingGround){
 
@@ -966,15 +975,11 @@ lastTime=time;
 
 dropCounter+=delta;
 
-/* 自動落下 */
-
 if(dropCounter>speed){
 
 drop();
 
 }
-
-/* 着地猶予 */
 
 if(touchingGround){
 
@@ -1000,8 +1005,6 @@ lockDelay=0;
 
 }
 
-/* 描画 */
-
 draw();
 
 requestAnimationFrame(update);
@@ -1022,22 +1025,22 @@ if(e.key==='ArrowDown'){
 drop();
 }
 
-/* 上キー */
-
-if(e.key==='ArrowUp'){
-rotatePlayer();
-}
-
-/* Q反時計 */
+/* 左回転 */
 
 if(e.key==='q' || e.key==='Q'){
-rotatePlayer();
+rotatePlayer(-1);
 }
 
-/* E時計 */
+/* 右回転 */
 
 if(e.key==='e' || e.key==='E'){
-rotatePlayer();
+rotatePlayer(1);
+}
+
+/* 上キー右回転 */
+
+if(e.key==='ArrowUp'){
+rotatePlayer(1);
 }
 
 if(e.code==='Space'){
