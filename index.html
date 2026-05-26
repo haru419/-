@@ -3,228 +3,294 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>NEON TETRIS</title>
+<title>Ultimate Neon Tetris</title>
 
 <style>
 
 *{
-    box-sizing:border-box;
+margin:0;
+padding:0;
+box-sizing:border-box;
 }
 
 body{
-    margin:0;
-    background:#020617;
-    font-family:sans-serif;
-    overflow:hidden;
-    color:white;
+background:
+linear-gradient(
+180deg,
+#000000,
+#020617
+);
+overflow:hidden;
+font-family:sans-serif;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+#bg{
+position:fixed;
+inset:0;
+background:
+radial-gradient(circle at 20% 20%,#0ea5e922 0%,transparent 25%),
+radial-gradient(circle at 80% 30%,#9333ea22 0%,transparent 25%),
+radial-gradient(circle at 50% 80%,#06b6d422 0%,transparent 25%);
+animation:bgMove 8s linear infinite alternate;
+z-index:-1;
+}
+
+@keyframes bgMove{
+0%{
+transform:translateY(0px);
+}
+100%{
+transform:translateY(-25px);
+}
 }
 
 .wrapper{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    min-height:100vh;
-    padding:10px;
-}
-
-.title{
-    font-size:42px;
-    font-weight:bold;
-    color:#00ffff;
-    margin-bottom:15px;
-    text-shadow:
-    0 0 10px #00ffff,
-    0 0 20px #00ffff,
-    0 0 40px #00ffff;
-}
-
-.game-area{
-    display:flex;
-    gap:15px;
-    align-items:flex-start;
+display:flex;
+gap:20px;
+align-items:flex-start;
+position:relative;
 }
 
 canvas{
-    background:#050816;
-    border:3px solid #00ffff;
-    border-radius:12px;
-    box-shadow:
-    0 0 10px #00ffff,
-    0 0 30px rgba(0,255,255,0.5);
+background:#050505;
+border:3px solid #00ffff;
+box-shadow:
+0 0 5px #00ffff,
+0 0 20px rgba(0,255,255,0.25);
 }
 
 .side{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
+width:220px;
+position:absolute;
+right:-240px;
+top:0;
 }
 
 .panel{
-    width:140px;
-    background:#0f172a;
-    border:2px solid #00ffff;
-    border-radius:12px;
-    padding:10px;
-    box-shadow:0 0 15px rgba(0,255,255,0.3);
+background:
+linear-gradient(
+180deg,
+#111827,
+#030712
+);
+
+border:2px solid #00ffff;
+
+box-shadow:
+0 0 10px rgba(0,255,255,0.2);
+
+border-radius:8px;
+padding:12px;
+margin-bottom:12px;
 }
 
-.panel-title{
-    color:#00ffff;
-    margin-bottom:8px;
-    font-weight:bold;
+.title{
+font-family:monospace;
+letter-spacing:2px;
+font-size:34px;
+font-weight:bold;
+margin-bottom:12px;
+color:#00ffff;
+text-shadow:
+0 0 10px #00ffff,
+0 0 20px #00ffff;
 }
 
 .info{
-    font-size:20px;
+font-size:22px;
+margin-top:8px;
 }
 
-.mobile-controls{
-    margin-top:15px;
-    display:none;
+.effect{
+position:fixed;
+top:20px;
+left:50%;
+transform:translateX(-50%);
+font-size:48px;
+font-weight:bold;
+pointer-events:none;
+opacity:0;
 }
 
-.row{
-    display:flex;
-    justify-content:center;
-    gap:10px;
-    margin-top:10px;
+.show{
+animation:pop 1s ease;
 }
 
-.btn{
-    width:70px;
-    height:70px;
-    border:none;
-    border-radius:15px;
-    background:#111827;
-    color:#00ffff;
-    font-size:26px;
-    border:2px solid #00ffff;
-    box-shadow:
-    0 0 10px #00ffff;
+@keyframes pop{
+0%{
+transform:translateX(-50%) scale(0.5);
+opacity:0;
+}
+30%{
+opacity:1;
+}
+100%{
+transform:translateX(-50%) scale(1.4);
+opacity:0;
+}
 }
 
-.btn:active{
-    transform:scale(0.95);
+.mobile{
+position:fixed;
+bottom:10px;
+left:50%;
+transform:translateX(-50%);
+display:flex;
+gap:10px;
 }
 
-.big{
-    width:150px;
+.mobile button{
+width:70px;
+height:70px;
+font-size:24px;
+background:#111827;
+color:#00ffff;
+border:2px solid #00ffff;
+border-radius:14px;
 }
 
-@media(max-width:900px){
-
-    .game-area{
-        flex-direction:column;
-        align-items:center;
-    }
-
-    .mobile-controls{
-        display:block;
-    }
-
+@media(min-width:900px){
+.mobile{
+display:none;
+}
 }
 
 </style>
 </head>
 <body>
 
+<div id="bg"></div>
+
+<div id="effect" class="effect"></div>
+
 <div class="wrapper">
-
-<div class="title">NEON TETRIS</div>
-
-<div class="game-area">
 
 <canvas id="game" width="300" height="600"></canvas>
 
 <div class="side">
 
+<div class="title">NEON TETRIS</div>
+
 <div class="panel">
-<div class="panel-title">SCORE</div>
+SCORE
 <div class="info" id="score">0</div>
 </div>
 
 <div class="panel">
-<div class="panel-title">LEVEL</div>
+LEVEL
 <div class="info" id="level">1</div>
 </div>
 
 <div class="panel">
-<div class="panel-title">LINES</div>
+LINES
 <div class="info" id="lines">0</div>
 </div>
 
 <div class="panel">
-<div class="panel-title">NEXT</div>
-<canvas id="next" width="120" height="120"></canvas>
+COMBO
+<div class="info" id="combo">0</div>
 </div>
 
 <div class="panel">
-<div class="panel-title">HOLD</div>
-<canvas id="hold" width="120" height="120"></canvas>
+NEXT
+<canvas id="next" width="150" height="150"></canvas>
+</div>
+
+<div class="panel">
+HOLD
+<canvas id="hold" width="150" height="150"></canvas>
 </div>
 
 </div>
-</div>
-
-<div class="mobile-controls">
-
-<div class="row">
-<button class="btn big" id="rotate">↻</button>
-<button class="btn big" id="harddrop">⤓</button>
-</div>
-
-<div class="row">
-<button class="btn" id="left">←</button>
-<button class="btn" id="down">↓</button>
-<button class="btn" id="right">→</button>
-</div>
-
-<div class="row">
-<button class="btn big" id="holdBtn">HOLD</button>
-</div>
 
 </div>
+
+<div class="mobile">
+
+<button onclick="move(-1)">←</button>
+<button onclick="drop()">↓</button>
+<button onclick="move(1)">→</button>
+<button onclick="rotatePlayer()">↻</button>
+<button onclick="hardDrop()">⤓</button>
+<button onclick="holdPieceFunc()">H</button>
 
 </div>
 
 <script>
 
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById('game');
+const ctx=canvas.getContext('2d');
 
-const nextCanvas = document.getElementById("next");
-const nextCtx = nextCanvas.getContext("2d");
+const nextCanvas=document.getElementById('next');
+const nextCtx=nextCanvas.getContext('2d');
 
-const holdCanvas = document.getElementById("hold");
-const holdCtx = holdCanvas.getContext("2d");
+const holdCanvas=document.getElementById('hold');
+const holdCtx=holdCanvas.getContext('2d');
 
-ctx.scale(30,30);
-nextCtx.scale(30,30);
-holdCtx.scale(30,30);
+const effect=document.getElementById('effect');
 
-const colors = [
+const BLOCK=30;
+const COLS=10;
+const ROWS=20;
+
+const COLORS=[
 null,
-"#00ffff",
-"#0066ff",
-"#ff8800",
-"#ffff00",
-"#00ff66",
-"#bb00ff",
-"#ff0033"
+['#67e8f9','#06b6d4'],
+['#60a5fa','#2563eb'],
+['#fdba74','#ea580c'],
+['#fde047','#eab308'],
+['#86efac','#16a34a'],
+['#d8b4fe','#9333ea'],
+['#fda4af','#e11d48']
 ];
 
+const arena=createMatrix(COLS,ROWS);
+
+const particles=[];
+
+const player={
+pos:{x:0,y:0},
+matrix:null,
+score:0,
+lines:0,
+level:1,
+combo:0
+};
+
+let next=randomPiece();
+let hold=null;
+let canHold=true;
+
+let dropCounter=0;
+let lastTime=0;
+let speed=700;
+
+/* 着地猶予 */
+
+let lockDelay=0;
+let lockDelayMax=30;
+let touchingGround=false;
+
 function createMatrix(w,h){
-    const matrix=[];
-    while(h--){
-        matrix.push(new Array(w).fill(0));
-    }
-    return matrix;
+
+const matrix=[];
+
+while(h--){
+matrix.push(new Array(w).fill(0));
+}
+
+return matrix;
+
 }
 
 function createPiece(type){
 
-if(type==="T"){
+if(type==='T'){
 return [
 [0,6,0],
 [6,6,6],
@@ -232,14 +298,14 @@ return [
 ];
 }
 
-if(type==="O"){
+if(type==='O'){
 return [
 [4,4],
 [4,4]
 ];
 }
 
-if(type==="L"){
+if(type==='L'){
 return [
 [0,3,0],
 [0,3,0],
@@ -247,7 +313,7 @@ return [
 ];
 }
 
-if(type==="J"){
+if(type==='J'){
 return [
 [0,2,0],
 [0,2,0],
@@ -255,16 +321,13 @@ return [
 ];
 }
 
-if(type==="I"){
+if(type==='I'){
 return [
-[0,1,0,0],
-[0,1,0,0],
-[0,1,0,0],
-[0,1,0,0]
+[1,1,1,1]
 ];
 }
 
-if(type==="S"){
+if(type==='S'){
 return [
 [0,5,5],
 [5,5,0],
@@ -272,7 +335,7 @@ return [
 ];
 }
 
-if(type==="Z"){
+if(type==='Z'){
 return [
 [7,7,0],
 [0,7,7],
@@ -283,69 +346,65 @@ return [
 }
 
 function randomPiece(){
-const pieces="TJLOSZI";
+
+const pieces='TJLOSZI';
+
 return createPiece(
 pieces[Math.floor(Math.random()*pieces.length)]
 );
+
 }
 
-const arena=createMatrix(10,20);
+function collide(){
 
-const player={
-pos:{x:0,y:0},
-matrix:null,
-score:0,
-lines:0,
-level:1
-};
+for(let y=0;y<player.matrix.length;y++){
 
-let nextPiece=randomPiece();
-let holdPiece=null;
-let canHold=true;
-
-function collide(arena,player){
-
-const [m,o]=[player.matrix,player.pos];
-
-for(let y=0;y<m.length;y++){
-for(let x=0;x<m[y].length;x++){
+for(let x=0;x<player.matrix[y].length;x++){
 
 if(
-m[y][x]!==0 &&
-(arena[y+o.y] &&
-arena[y+o.y][x+o.x])!==0
+player.matrix[y][x]!==0 &&
+(
+arena[y+player.pos.y] &&
+arena[y+player.pos.y][x+player.pos.x]
+)!==0
 ){
 return true;
 }
 
 }
+
 }
 
 return false;
+
 }
 
-function merge(arena,player){
+function merge(){
 
 player.matrix.forEach((row,y)=>{
+
 row.forEach((value,x)=>{
 
 if(value!==0){
+
 arena[y+player.pos.y][x+player.pos.x]=value;
-}
-
-});
-});
 
 }
 
-function arenaSweep(){
+});
+
+});
+
+}
+
+function sweep(){
 
 let cleared=0;
 
 outer:
-for(let y=arena.length-1;y>0;--y){
+for(let y=arena.length-1;y>0;y--){
 
-for(let x=0;x<arena[y].length;++x){
+for(let x=0;x<arena[y].length;x++){
 
 if(arena[y][x]===0){
 continue outer;
@@ -353,9 +412,21 @@ continue outer;
 
 }
 
+for(let i=0;i<40;i++){
+
+particles.push({
+x:Math.random()*300,
+y:y*30,
+vx:(Math.random()-0.5)*4,
+vy:Math.random()*-5,
+life:40
+});
+
+}
+
 arena.splice(y,1);
 
-arena.unshift(new Array(10).fill(0));
+arena.unshift(new Array(COLS).fill(0));
 
 y++;
 
@@ -365,48 +436,57 @@ cleared++;
 
 if(cleared>0){
 
-player.lines += cleared;
+player.combo++;
 
-player.score += cleared*100*player.level;
+player.lines+=cleared;
+
+player.score+=cleared*100*player.level;
+
+player.score+=player.combo*50;
 
 player.level=Math.floor(player.lines/10)+1;
 
-dropInterval=Math.max(
-100,
-700-(player.level-1)*50
+speed=Math.max(80,700-player.level*40);
+
+showEffect(
+cleared===4
+? 'TETRIS!!'
+: player.combo+' COMBO'
 );
 
 updateUI();
 
-}
+}else{
+
+player.combo=0;
 
 }
 
-function playerReset(){
+}
 
-player.matrix=nextPiece;
+function resetPlayer(){
 
-nextPiece=randomPiece();
+player.matrix=next;
 
-drawNext();
+next=randomPiece();
 
 player.pos.y=0;
-
-player.pos.x=
-(10/2|0)-
-(player.matrix[0].length/2|0);
+player.pos.x=3;
 
 canHold=true;
 
-if(collide(arena,player)){
+drawNext();
 
-alert("GAME OVER");
+if(collide()){
+
+alert('GAME OVER');
 
 arena.forEach(row=>row.fill(0));
 
 player.score=0;
 player.lines=0;
 player.level=1;
+player.combo=0;
 
 updateUI();
 
@@ -414,29 +494,297 @@ updateUI();
 
 }
 
-function playerMove(dir){
+function drawBlock(x,y,colors,alpha=1){
 
-player.pos.x += dir;
+const gx=x*BLOCK;
+const gy=y*BLOCK;
 
-if(collide(arena,player)){
-player.pos.x -= dir;
+const gradient=ctx.createLinearGradient(
+gx,
+gy,
+gx,
+gy+BLOCK
+);
+
+gradient.addColorStop(0,colors[0]);
+gradient.addColorStop(0.5,colors[1]);
+gradient.addColorStop(1,"#000000");
+
+ctx.globalAlpha=alpha;
+
+ctx.fillStyle=gradient;
+
+ctx.shadowColor=colors[0];
+ctx.shadowBlur=1;
+
+ctx.fillRect(
+gx,
+gy,
+BLOCK,
+BLOCK
+);
+
+/* 上ハイライト */
+
+ctx.fillStyle="#ffffff55";
+
+ctx.fillRect(
+gx+2,
+gy+2,
+BLOCK-4,
+4
+);
+
+/* 左ハイライト */
+
+ctx.fillRect(
+gx+2,
+gy+2,
+4,
+BLOCK-4
+);
+
+/* 下影 */
+
+ctx.fillStyle="#00000066";
+
+ctx.fillRect(
+gx,
+gy+BLOCK-5,
+BLOCK,
+5
+);
+
+/* 右影 */
+
+ctx.fillRect(
+gx+BLOCK-5,
+gy,
+5,
+BLOCK
+);
+
+/* 枠 */
+
+ctx.strokeStyle="#ffffff";
+ctx.lineWidth=2;
+
+ctx.strokeRect(
+gx,
+gy,
+BLOCK,
+BLOCK
+);
+
+ctx.globalAlpha=1;
+
+}
+
+function drawGhost(){
+
+let ghostY=player.pos.y;
+
+while(!ghostCollide(ghostY)){
+ghostY++;
+}
+
+ghostY--;
+
+player.matrix.forEach((row,y)=>{
+
+row.forEach((value,x)=>{
+
+if(value!==0){
+
+drawBlock(
+x+player.pos.x,
+y+ghostY,
+COLORS[value],
+0.45
+);
+
+}
+
+});
+
+});
+
+}
+
+function ghostCollide(testY){
+
+for(let y=0;y<player.matrix.length;y++){
+
+for(let x=0;x<player.matrix[y].length;x++){
+
+if(
+player.matrix[y][x]!==0 &&
+(
+arena[y+testY] &&
+arena[y+testY][x+player.pos.x]
+)!==0
+){
+return true;
 }
 
 }
 
-function playerDrop(){
+}
+
+return false;
+
+}
+
+function updateParticles(){
+
+for(let i=particles.length-1;i>=0;i--){
+
+const p=particles[i];
+
+p.x+=p.vx;
+p.y+=p.vy;
+
+p.vy+=0.2;
+
+p.life--;
+
+if(p.life<=0){
+particles.splice(i,1);
+}
+
+}
+
+}
+
+function draw(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+/* グリッド */
+
+ctx.strokeStyle="#ffffff11";
+ctx.lineWidth=1;
+
+for(let x=0;x<=10;x++){
+
+ctx.beginPath();
+
+ctx.moveTo(x*BLOCK,0);
+
+ctx.lineTo(x*BLOCK,600);
+
+ctx.stroke();
+
+}
+
+for(let y=0;y<=20;y++){
+
+ctx.beginPath();
+
+ctx.moveTo(0,y*BLOCK);
+
+ctx.lineTo(300,y*BLOCK);
+
+ctx.stroke();
+
+}
+
+/* 盤面 */
+
+arena.forEach((row,y)=>{
+
+row.forEach((value,x)=>{
+
+if(value!==0){
+
+drawBlock(
+x,
+y,
+COLORS[value]
+);
+
+}
+
+});
+
+});
+
+/* パーティクル */
+
+for(const p of particles){
+
+ctx.fillStyle='#00ffff';
+
+ctx.fillRect(
+p.x,
+p.y,
+4,
+4
+);
+
+}
+
+updateParticles();
+
+/* ゴースト */
+
+drawGhost();
+
+/* プレイヤー */
+
+player.matrix.forEach((row,y)=>{
+
+row.forEach((value,x)=>{
+
+if(value!==0){
+
+drawBlock(
+x+player.pos.x,
+y+player.pos.y,
+COLORS[value]
+);
+
+}
+
+});
+
+});
+
+}
+
+function move(dir){
+
+player.pos.x+=dir;
+
+if(collide()){
+
+player.pos.x-=dir;
+
+}else{
+
+if(touchingGround){
+
+lockDelay=0;
+
+}
+
+}
+
+}
+
+function drop(){
 
 player.pos.y++;
 
-if(collide(arena,player)){
+if(collide()){
 
 player.pos.y--;
 
-merge(arena,player);
+touchingGround=true;
 
-arenaSweep();
+}else{
 
-playerReset();
+touchingGround=false;
 
 }
 
@@ -446,37 +794,32 @@ dropCounter=0;
 
 function hardDrop(){
 
-while(!collide(arena,player)){
+while(!collide()){
 player.pos.y++;
 }
 
 player.pos.y--;
 
-merge(arena,player);
+merge();
 
-arenaSweep();
+sweep();
 
-playerReset();
-
-dropCounter=0;
+resetPlayer();
 
 }
 
 function rotate(matrix){
 
-for(let y=0;y<matrix.length;++y){
+for(let y=0;y<matrix.length;y++){
 
-for(let x=0;x<y;++x){
+for(let x=0;x<y;x++){
 
 [
 matrix[x][y],
 matrix[y][x]
-
 ]=[
-
 matrix[y][x],
 matrix[x][y]
-
 ];
 
 }
@@ -487,136 +830,72 @@ matrix.forEach(row=>row.reverse());
 
 }
 
-function playerRotate(){
+function rotatePlayer(){
 
 rotate(player.matrix);
 
-if(collide(arena,player)){
+if(collide()){
 
 rotate(player.matrix);
 rotate(player.matrix);
 rotate(player.matrix);
-
-}
-
-}
-
-function hold(){
-
-if(!canHold) return;
-
-if(holdPiece===null){
-
-holdPiece=player.matrix;
-
-playerReset();
 
 }else{
 
-const temp=holdPiece;
+showEffect('T-SPIN');
 
-holdPiece=player.matrix;
+if(touchingGround){
+
+lockDelay=0;
+
+}
+
+}
+
+}
+
+function holdPieceFunc(){
+
+if(!canHold)return;
+
+if(hold===null){
+
+hold=player.matrix;
+
+resetPlayer();
+
+}else{
+
+const temp=hold;
+
+hold=player.matrix;
 
 player.matrix=temp;
 
-player.pos.y=0;
-player.pos.x=3;
-
 }
-
-drawHold();
 
 canHold=false;
 
-}
+holdCanvas.style.transform='scale(1.15)';
 
-function drawBlock(x,y,color,alpha=1){
+setTimeout(()=>{
 
-ctx.globalAlpha=alpha;
+holdCanvas.style.transform='scale(1)';
 
-ctx.fillStyle=color;
+},150);
 
-ctx.shadowColor=color;
-ctx.shadowBlur=15;
-
-ctx.fillRect(x,y,1,1);
-
-ctx.strokeStyle="#ffffff55";
-
-ctx.strokeRect(x,y,1,1);
-
-ctx.shadowBlur=0;
-
-ctx.globalAlpha=1;
-
-}
-
-function drawMatrix(matrix,offset,alpha=1){
-
-matrix.forEach((row,y)=>{
-
-row.forEach((value,x)=>{
-
-if(value!==0){
-
-drawBlock(
-x+offset.x,
-y+offset.y,
-colors[value],
-alpha
-);
-
-}
-
-});
-
-});
-
-}
-
-function drawGhost(){
-
-const ghost={
-pos:{
-x:player.pos.x,
-y:player.pos.y
-},
-matrix:player.matrix
-};
-
-while(!collide(arena,ghost)){
-ghost.pos.y++;
-}
-
-ghost.pos.y--;
-
-drawMatrix(
-ghost.matrix,
-ghost.pos,
-0.2
-);
-
-}
-
-function draw(){
-
-ctx.fillStyle="#050816";
-
-ctx.fillRect(0,0,canvas.width,canvas.height);
-
-drawMatrix(arena,{x:0,y:0});
-
-drawGhost();
-
-drawMatrix(player.matrix,player.pos);
+drawHold();
 
 }
 
 function drawMini(ctx2,matrix){
 
-ctx2.clearRect(0,0,120,120);
+ctx2.clearRect(0,0,150,150);
 
-if(!matrix) return;
+if(!matrix)return;
+
+const offsetX=1;
+const offsetY=1;
 
 matrix.forEach((row,y)=>{
 
@@ -624,9 +903,23 @@ row.forEach((value,x)=>{
 
 if(value!==0){
 
-ctx2.fillStyle=colors[value];
+ctx2.fillStyle=COLORS[value][0];
 
-ctx2.fillRect(x+0.5,y+0.5,1,1);
+ctx2.fillRect(
+(x+offsetX)*30,
+(y+offsetY)*30,
+28,
+28
+);
+
+ctx2.strokeStyle="#ffffff";
+
+ctx2.strokeRect(
+(x+offsetX)*30,
+(y+offsetY)*30,
+28,
+28
+);
 
 }
 
@@ -637,41 +930,77 @@ ctx2.fillRect(x+0.5,y+0.5,1,1);
 }
 
 function drawNext(){
-drawMini(nextCtx,nextPiece);
+drawMini(nextCtx,next);
 }
 
 function drawHold(){
-drawMini(holdCtx,holdPiece);
+drawMini(holdCtx,hold);
 }
 
 function updateUI(){
 
-document.getElementById("score").innerText=
-player.score;
-
-document.getElementById("level").innerText=
-player.level;
-
-document.getElementById("lines").innerText=
-player.lines;
+document.getElementById('score').innerText=player.score;
+document.getElementById('level').innerText=player.level;
+document.getElementById('lines').innerText=player.lines;
+document.getElementById('combo').innerText=player.combo;
 
 }
 
-let dropCounter=0;
-let dropInterval=700;
-let lastTime=0;
+function showEffect(text){
+
+effect.innerText=text;
+
+effect.classList.remove('show');
+
+void effect.offsetWidth;
+
+effect.classList.add('show');
+
+}
 
 function update(time=0){
 
-const deltaTime=time-lastTime;
+const delta=time-lastTime;
 
 lastTime=time;
 
-dropCounter += deltaTime;
+dropCounter+=delta;
 
-if(dropCounter > dropInterval){
-playerDrop();
+/* 自動落下 */
+
+if(dropCounter>speed){
+
+drop();
+
 }
+
+/* 着地猶予 */
+
+if(touchingGround){
+
+lockDelay++;
+
+if(lockDelay>=lockDelayMax){
+
+merge();
+
+sweep();
+
+resetPlayer();
+
+lockDelay=0;
+
+touchingGround=false;
+
+}
+
+}else{
+
+lockDelay=0;
+
+}
+
+/* 描画 */
 
 draw();
 
@@ -679,61 +1008,53 @@ requestAnimationFrame(update);
 
 }
 
-document.addEventListener("keydown",event=>{
+document.addEventListener('keydown',e=>{
 
-if(event.key==="ArrowLeft"){
-playerMove(-1);
+if(e.key==='ArrowLeft'){
+move(-1);
 }
 
-else if(event.key==="ArrowRight"){
-playerMove(1);
+if(e.key==='ArrowRight'){
+move(1);
 }
 
-else if(event.key==="ArrowDown"){
-playerDrop();
+if(e.key==='ArrowDown'){
+drop();
 }
 
-else if(event.key==="ArrowUp"){
-playerRotate();
+/* 上キー */
+
+if(e.key==='ArrowUp'){
+rotatePlayer();
 }
 
-else if(event.code==="Space"){
+/* Q反時計 */
+
+if(e.key==='q' || e.key==='Q'){
+rotatePlayer();
+}
+
+/* E時計 */
+
+if(e.key==='e' || e.key==='E'){
+rotatePlayer();
+}
+
+if(e.code==='Space'){
 hardDrop();
 }
 
-else if(event.key==="c" || event.key==="C"){
-hold();
+if(e.key==='c'||e.key==='C'){
+holdPieceFunc();
 }
 
 });
 
-document.getElementById("left").onclick=()=>{
-playerMove(-1);
-};
-
-document.getElementById("right").onclick=()=>{
-playerMove(1);
-};
-
-document.getElementById("down").onclick=()=>{
-playerDrop();
-};
-
-document.getElementById("rotate").onclick=()=>{
-playerRotate();
-};
-
-document.getElementById("harddrop").onclick=()=>{
-hardDrop();
-};
-
-document.getElementById("holdBtn").onclick=()=>{
-hold();
-};
-
-playerReset();
+resetPlayer();
 
 updateUI();
+
+drawHold();
 
 update();
 
