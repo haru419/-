@@ -425,6 +425,24 @@ arena[y+player.pos.y][x+player.pos.x]=value;
 
 }
 
+function isPerfectClear(){
+
+for(let y=0;y<arena.length;y++){
+
+for(let x=0;x<arena[y].length;x++){
+
+if(arena[y][x]!==0){
+return false;
+}
+
+}
+
+}
+
+return true;
+
+}
+
 function sweep(){
 
 let cleared=0;
@@ -476,11 +494,31 @@ player.level=Math.floor(player.lines/10)+1;
 
 speed=Math.max(80,700-player.level*40);
 
+if(isPerfectClear()){
+
+const bonus = 3200 * player.level;
+
+player.score += bonus;
+
+showEffect("★ PERFECT CLEAR ★");
+
+}else{
+
 showEffect(
 cleared===4
 ? 'TETRIS!!'
 : player.combo+' COMBO'
 );
+
+}
+
+updateUI();
+
+}else{
+
+player.combo=0;
+
+}
 
 updateUI();
 
