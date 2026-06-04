@@ -3,9 +3,58 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Ultimate Neon Tetris - Layout Fixed</title>
+<title>Ultimate Neon Tetris - Theme Switcher</title>
 
 <style>
+/* --- テーマ変数定義 --- */
+:root {
+    /* DEFAULT: CYBER NEON */
+    --bg-gradient: linear-gradient(180deg, #000000, #020617);
+    --bg-radial: radial-gradient(circle at 20% 20%, #0ea5e922 0%, transparent 25%), radial-gradient(circle at 80% 30%, #9333ea22 0%, transparent 25%), radial-gradient(circle at 50% 80%, #06b6d422 0%, transparent 25%);
+    --main-border: #00ffff;
+    --main-glow: 0 0 5px #00ffff, 0 0 20px rgba(0,255,255,0.25);
+    --panel-bg: linear-gradient(180deg, #111827, #030712);
+    --panel-border: #00ffff;
+    --panel-glow: 0 0 10px rgba(0,255,255,0.2);
+    --title-color: #00ffff;
+    --label-color: #854dff;
+    --info-color: #ffffff;
+    --canvas-bg: #050505;
+    --grid-color: #ffffff11;
+}
+
+[data-theme="retro"] {
+    /* RETRO GB (ゲームボーイ風) */
+    --bg-gradient: linear-gradient(180deg, #8b956d, #7c875e);
+    --bg-radial: none;
+    --main-border: #0f380f;
+    --main-glow: none;
+    --panel-bg: #9bbc0f;
+    --panel-border: #0f380f;
+    --panel-glow: none;
+    --title-color: #0f380f;
+    --label-color: #306230;
+    --info-color: #0f380f;
+    --canvas-bg: #9bbc0f;
+    --grid-color: #0f380f22;
+}
+
+[data-theme="mono"] {
+    /* MONO MATRIX (白黒ミニマル) */
+    --bg-gradient: linear-gradient(180deg, #1c1c1c, #0a0a0a);
+    --bg-radial: none;
+    --main-border: #ffffff;
+    --main-glow: 0 0 10px rgba(255,255,255,0.3);
+    --panel-bg: #121212;
+    --panel-border: #444444;
+    --panel-glow: none;
+    --title-color: #ffffff;
+    --label-color: #888888;
+    --info-color: #ffffff;
+    --canvas-bg: #000000;
+    --grid-color: #ffffff0a;
+}
+
 *{
 margin:0;
 padding:0;
@@ -13,12 +62,7 @@ box-sizing:border-box;
 }
 
 body{
-background:
-linear-gradient(
-180deg,
-#000000,
-#020617
-);
+background: var(--bg-gradient);
 overflow:hidden;
 font-family:sans-serif;
 color:white;
@@ -26,15 +70,13 @@ display:flex;
 justify-content:center;
 align-items:center;
 min-height:100vh;
+transition: background 0.3s ease;
 }
 
 #bg{
 position:fixed;
 inset:0;
-background:
-radial-gradient(circle at 20% 20%,#0ea5e922 0%,transparent 25%),
-radial-gradient(circle at 80% 30%,#9333ea22 0%,transparent 25%),
-radial-gradient(circle at 50% 80%,#06b6d422 0%,transparent 25%);
+background: var(--bg-radial);
 animation:bgMove 8s linear infinite alternate;
 z-index:-1;
 }
@@ -44,44 +86,63 @@ z-index:-1;
 100%{ transform:translateY(-25px); }
 }
 
+/* テーマセレクターの配置 */
+.theme-selector {
+position: fixed;
+top: 20px;
+right: 20px;
+z-index: 100;
+background: #111827;
+border: 2px solid #00ffff;
+color: #00ffff;
+padding: 6px 12px;
+border-radius: 8px;
+font-weight: bold;
+cursor: pointer;
+outline: none;
+font-family: monospace;
+}
+[data-theme="retro"] .theme-selector {
+background: #9bbc0f;
+border-color: #0f380f;
+color: #0f380f;
+}
+[data-theme="mono"] .theme-selector {
+background: #121212;
+border-color: #ffffff;
+color: #ffffff;
+}
+
 /* メイン画面とサイドパネルを横並びにするラッパー */
 .wrapper{
 display:flex;
 gap:20px;
-align-items:stretch; /* 高さを揃える */
+align-items:stretch; 
 position:relative;
 max-width:100vw;
 padding:10px;
 }
 
 canvas#game{
-background:#050505;
-border:3px solid #00ffff;
-box-shadow:
-0 0 5px #00ffff,
-0 0 20px rgba(0,255,255,0.25);
+background: var(--canvas-bg);
+border:3px solid var(--main-border);
+box-shadow: var(--main-glow);
 flex-shrink: 0;
 }
 
-/* 右側のサイドパネルの配置を修正（絶対配置をやめて横に並べる） */
+/* 右側のサイドパネル */
 .side{
 width:200px;
 display:flex;
 flex-direction:column;
-justify-content:space-between; /* 隙間を等間隔に */
+justify-content:space-between; 
 flex-shrink: 0;
 }
 
 .panel{
-background:
-linear-gradient(
-180deg,
-#111827,
-#030712
-);
-border:2px solid #00ffff;
-box-shadow:
-0 0 10px rgba(0,255,255,0.2);
+background: var(--panel-bg);
+border:2px solid var(--panel-border);
+box-shadow: var(--panel-glow);
 border-radius:8px;
 padding:10px;
 flex: 1;
@@ -98,9 +159,9 @@ margin-bottom: 0;
 .panel canvas {
 display: block;
 margin: 4px auto 0 auto;
-background: #050505;
-border: 1px solid #00ffff33;
-width: 100px; /* 縦横比を維持したまま少しコンパクトに */
+background: var(--canvas-bg);
+border: 1px solid var(--grid-color);
+width: 100px; 
 height: 100px;
 }
 
@@ -109,17 +170,19 @@ font-family:monospace;
 letter-spacing:1px;
 font-size:24px;
 font-weight:bold;
-color:#00ffff;
-text-shadow:
-0 0 10px #00ffff,
-0 0 20px #00ffff;
+color: var(--title-color);
+text-shadow: inherit; /* CSS側での発光はテーマごと、またはJS制御に変更 */
 text-align:center;
 margin-bottom:8px;
+}
+/* デフォルトのネオンの時だけタイトルを発光させる */
+:root:not([data-theme="retro"]):not([data-theme="mono"]) .title {
+text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
 }
 
 .panel-label {
 font-size:12px;
-color:#854dff;
+color: var(--label-color);
 font-weight:bold;
 letter-spacing:1px;
 text-transform:uppercase;
@@ -129,7 +192,7 @@ text-transform:uppercase;
 font-size:20px;
 font-weight:bold;
 margin-top:2px;
-color:#fff;
+color: var(--info-color);
 text-align:right;
 font-family:monospace;
 }
@@ -143,13 +206,13 @@ font-size:42px;
 font-weight:bold;
 pointer-events:none;
 opacity:0;
-color:#00ffff;
-text-shadow:
-0 0 10px #00ffff,
-0 0 20px #00ffff;
+color: var(--title-color);
 text-align: center;
 white-space: nowrap;
 z-index: 10;
+}
+:root:not([data-theme="retro"]):not([data-theme="mono"]) .effect {
+text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
 }
 
 .show{
@@ -157,17 +220,9 @@ animation:pop 1s ease forwards;
 }
 
 @keyframes pop{
-0%{
-transform:translateX(-50%) scale(0.5);
-opacity:0;
-}
-30%{
-opacity:1;
-}
-100%{
-transform:translateX(-50%) scale(1.2);
-opacity:0;
-}
+0%{ transform:translateX(-50%) scale(0.5); opacity:0; }
+30%{ opacity:1; }
+100%{ transform:translateX(-50%) scale(1.2); opacity:0; }
 }
 
 .mobile{
@@ -183,9 +238,9 @@ gap:10px;
 width:70px;
 height:70px;
 font-size:24px;
-background:#111827;
-color:#00ffff;
-border:2px solid #00ffff;
+background: var(--panel-bg);
+color: var(--title-color);
+border:2px solid var(--panel-border);
 border-radius:14px;
 cursor: pointer;
 }
@@ -195,7 +250,11 @@ body {
 flex-direction: column;
 overflow: auto;
 justify-content: flex-start;
-padding-top: 10px;
+padding-top: 50px; /* セレクター用の余白 */
+}
+.theme-selector {
+position: static;
+margin-bottom: 10px;
 }
 .wrapper {
 flex-direction: column;
@@ -234,6 +293,12 @@ display:none;
 <div id="bg"></div>
 <div id="effect" class="effect"></div>
 
+<select class="theme-selector" id="themeSelect" onchange="changeTheme(this.value)">
+    <option value="neon">CYBER NEON</option>
+    <option value="retro">RETRO GB</option>
+    <option value="mono">MONO MATRIX</option>
+</select>
+
 <div class="wrapper">
 <canvas id="game" width="300" height="600"></canvas>
 
@@ -271,16 +336,65 @@ const BLOCK=30;
 const COLS=10;
 const ROWS=20;
 
-const COLORS=[
-null,
-['#67e8f9','#06b6d4'], // I
-['#60a5fa','#2563eb'], // J
-['#fdba74','#ea580c'], // L
-['#fde047','#eab308'], // O
-['#86efac','#16a34a'], // S
-['#d8b4fe','#9333ea'], // T
-['#fda4af','#e11d48']  // Z
-];
+// --- テーマ別カラー定義 ---
+let currentTheme = 'neon';
+
+const THEME_COLORS = {
+    neon: [
+        null,
+        ['#67e8f9','#06b6d4'], // I
+        ['#60a5fa','#2563eb'], // J
+        ['#fdba74','#ea580c'], // L
+        ['#fde047','#eab308'], // O
+        ['#86efac','#16a34a'], // S
+        ['#d8b4fe','#9333ea'], // T
+        ['#fda4af','#e11d48']  // Z
+    ],
+    retro: [
+        null,
+        ['#0f380f','#0f380f'], // I (レトロはすべて同じ単色調)
+        ['#306230','#306230'], // J
+        ['#0f380f','#0f380f'], // L
+        ['#306230','#306230'], // O
+        ['#0f380f','#0f380f'], // S
+        ['#306230','#306230'], // T
+        ['#0f380f','#0f380f']  // Z
+    ],
+    mono: [
+        null,
+        ['#ffffff','#aaaaaa'], // I
+        ['#dddddd','#888888'], // J
+        ['#cccccc','#777777'], // L
+        ['#eeeeee','#999999'], // O
+        ['#bbbbbb','#666666'], // S
+        ['#ffffff','#444444'], // T
+        ['#aaaaaa','#555555']  // Z
+    ]
+};
+
+// パーティクルの色
+const PARTICLE_COLORS = {
+    neon: '#00ffff',
+    retro: '#0f380f',
+    mono: '#ffffff'
+};
+
+function getColors() {
+    return THEME_COLORS[currentTheme];
+}
+
+function changeTheme(themeName) {
+    currentTheme = themeName;
+    if (themeName === 'neon') {
+        document.documentElement.removeAttribute('data-theme');
+    } else {
+        document.documentElement.setAttribute('data-theme', themeName);
+    }
+    // 切り替え時に描画を更新
+    draw();
+    drawNext();
+    drawHold();
+}
 
 const arena=createMatrix(COLS,ROWS);
 const particles=[];
@@ -500,204 +614,3 @@ canHold=true;
 drawNext();
 
 if(collide()){
-alert('GAME OVER');
-arena.forEach(row=>row.fill(0));
-player.score=0; player.lines=0; player.level=1; player.combo=0;
-updateUI();
-}
-}
-
-function drawBlock(x,y,colors,alpha=1){
-const gx=x*BLOCK; const gy=y*BLOCK;
-if(gy < 0) return; 
-const gradient=ctx.createLinearGradient(gx,gy,gx,gy+BLOCK);
-gradient.addColorStop(0,colors[0]);
-gradient.addColorStop(0.5,colors[1]);
-gradient.addColorStop(1,"#000000");
-ctx.globalAlpha=alpha; ctx.fillStyle=gradient;
-ctx.shadowColor=colors[0]; ctx.shadowBlur=1;
-ctx.fillRect(gx,gy,BLOCK,BLOCK);
-ctx.fillStyle="#ffffff55"; ctx.fillRect(gx+2,gy+2,BLOCK-4,4); ctx.fillRect(gx+2,gy+2,4,BLOCK-4);
-ctx.fillStyle="#00000066"; ctx.fillRect(gx,gy+BLOCK-5,BLOCK,5); ctx.fillRect(gx+BLOCK-5,gy,5,BLOCK);
-ctx.strokeStyle="#ffffff"; ctx.lineWidth=2; ctx.strokeRect(gx,gy,BLOCK,BLOCK);
-ctx.globalAlpha=1;
-}
-
-function drawGhost(){
-let ghostY = 0;
-while(!collide({x: 0, y: ghostY})) { ghostY++; }
-ghostY--;
-player.matrix.forEach((row,y)=>{
-row.forEach((value,x)=>{
-if(value!==0){ drawBlock(x+player.pos.x,y+player.pos.y+ghostY,COLORS[value],0.25); }
-});
-});
-}
-
-function updateParticles(){
-for(let i=particles.length-1;i>=0;i--){
-const p=particles[i];
-p.x+=p.vx; p.y+=p.vy; p.vy+=0.2; p.life--;
-if(p.life<=0){ particles.splice(i,1); }
-}
-}
-
-function draw(){
-ctx.clearRect(0,0,canvas.width,canvas.height);
-ctx.strokeStyle="#ffffff11"; ctx.lineWidth=1;
-for(let x=0;x<=10;x++){ ctx.beginPath(); ctx.moveTo(x*BLOCK,0); ctx.lineTo(x*BLOCK,600); ctx.stroke(); }
-for(let y=0;y<=20;y++){ ctx.beginPath(); ctx.moveTo(0,y*BLOCK); ctx.lineTo(300,y*BLOCK); ctx.stroke(); }
-
-arena.forEach((row,y)=>{
-row.forEach((value,x)=>{
-if(value!==0){ drawBlock(x,y,COLORS[value]); }
-});
-});
-for(const p of particles){ ctx.fillStyle='#00ffff'; ctx.fillRect(p.x,p.y,4,4); }
-updateParticles();
-drawGhost();
-player.matrix.forEach((row,y)=>{
-row.forEach((value,x)=>{
-if(value!==0){ drawBlock(x+player.pos.x,y+player.pos.y,COLORS[value]); }
-});
-});
-}
-
-function move(dir){
-player.pos.x+=dir;
-if(collide()){ player.pos.x-=dir; }
-else{ player.lastMoveWasRotate=false; if(touchingGround){ lockDelay=0; } }
-}
-
-function drop(){
-player.pos.y++;
-if(collide()){ player.pos.y--; touchingGround=true; }
-else{ player.lastMoveWasRotate=false; touchingGround=false; }
-dropCounter=0;
-}
-
-function hardDrop(){
-let ghostY = 0;
-while(!collide({x:0, y:ghostY})){ ghostY++; }
-ghostY--;
-player.pos.y += ghostY;
-merge(); sweep(); resetPlayer();
-}
-
-function rotate(matrix,dir){
-for(let y=0;y<matrix.length;y++){
-for(let x=0;x<y;x++){ [matrix[x][y],matrix[y][x]]=[matrix[y][x],matrix[x][y]]; }
-}
-if(dir>0){ matrix.forEach(row=>row.reverse()); }
-else{ matrix.reverse(); }
-}
-
-function rotatePlayer(dir){
-if(player.type === 'O') return; 
-const startRot = player.rotationIdx;
-const endRot = (startRot + (dir > 0 ? 1 : 3)) % 4;
-const clonedMatrix = player.matrix.map(row => [...row]);
-rotate(clonedMatrix, dir);
-const kickSet = (player.type === 'I') ? KICK_DATA_I : KICK_DATA_NORMAL;
-const lookupKey = `${startRot}->${endRot}`;
-const kicks = kickSet[lookupKey];
-
-for (let i = 0; i < kicks.length; i++) {
-    const offset = { x: kicks[i][0], y: -kicks[i][1] };
-    if (!collide(offset, clonedMatrix)) {
-        player.pos.x += offset.x; player.pos.y += offset.y;
-        player.matrix = clonedMatrix; player.rotationIdx = endRot;
-        player.lastMoveWasRotate = true;
-        if(touchingGround){ lockDelay=0; }
-        return;
-    }
-}
-}
-
-function holdPieceFunc(){
-if(!canHold)return;
-const currentType = player.type;
-if(hold===null){
-hold = currentType;
-resetPlayer();
-}else{
-const temp = hold;
-hold = currentType;
-player.matrix = createPiece(temp);
-player.type = temp;
-player.rotationIdx = 0;
-player.lastMoveWasRotate = false;
-player.pos.y = player.type === 'I' ? -1 : 0;
-player.pos.x = Math.floor((COLS - player.matrix[0].length) / 2);
-}
-canHold=false;
-holdCanvas.style.transform='scale(1.15)';
-setTimeout(()=>{ holdCanvas.style.transform='scale(1)'; },150);
-drawHold();
-dropCounter = 0;
-}
-
-function drawMini(ctx2,type){
-ctx2.clearRect(0,0,150,150);
-if(!type)return;
-const matrix = createPiece(type);
-const offsetX = (5 - matrix[0].length) / 2;
-const offsetY = (5 - matrix.length) / 2;
-matrix.forEach((row,y)=>{
-row.forEach((value,x)=>{
-if(value!==0){
-ctx2.fillStyle=COLORS[value][0];
-ctx2.fillRect((x+offsetX)*30,(y+offsetY)*30,28,28);
-ctx2.strokeStyle="#ffffff";
-ctx2.strokeRect((x+offsetX)*30,(y+offsetY)*30,28,28);
-}
-});
-});
-}
-
-function drawNext(){ drawMini(nextCtx,next.type); }
-function drawHold(){ drawMini(holdCtx,hold); }
-
-function updateUI(){
-document.getElementById('score').innerText=player.score;
-document.getElementById('level').innerText=player.level;
-document.getElementById('lines').innerText=player.lines;
-document.getElementById('combo').innerText=player.combo;
-}
-
-function showEffect(text){
-effect.innerText=text;
-effect.classList.remove('show');
-void effect.offsetWidth;
-effect.classList.add('show');
-}
-
-function update(time=0){
-const delta=time-lastTime;
-lastTime=time;
-dropCounter+=delta;
-if(dropCounter>speed){ drop(); }
-if(touchingGround){
-lockDelay++;
-if(lockDelay>=lockDelayMax){ merge(); sweep(); resetPlayer(); lockDelay=0; touchingGround=false; }
-}else{ lockDelay=0; }
-draw();
-requestAnimationFrame(update);
-}
-
-document.addEventListener('keydown',e=>{
-if(e.key==='ArrowLeft'){ move(-1); }
-if(e.key==='ArrowRight'){ move(1); }
-if(e.key==='ArrowDown'){ drop(); }
-if(e.key==='q' || e.key==='Q'){ rotatePlayer(-1); }
-if(e.key==='e' || e.key==='E'){ rotatePlayer(1); }
-if(e.key==='ArrowUp'){ rotatePlayer(1); }
-if(e.code==='Space'){ hardDrop(); }
-if(e.key==='c'||e.key==='C'){ holdPieceFunc(); }
-});
-
-resetPlayer(); updateUI(); drawHold(); update();
-</script>
-
-</body>
-</html>
